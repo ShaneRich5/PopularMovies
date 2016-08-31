@@ -1,8 +1,10 @@
 package com.shane.popularmovies.activities;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,17 +13,18 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.shane.popularmovies.Movie;
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.adapters.MovieAdapter;
 import com.shane.popularmovies.constants.Constants;
-import com.shane.popularmovies.views.EndlessRecyclerOnScrollListener;
+import com.shane.popularmovies.models.Movie;
+import com.shane.popularmovies.views.recyclers.EndlessRecyclerOnScrollListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,6 +32,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -45,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String STATE_MOVIE_ID_LIST = "movie_id_list";
 
     @BindView(R.id.recycler_movies) RecyclerView moviesRecyclerView;
+    @BindView(R.id.fab_scroll_reset) FloatingActionButton scrollResetFab;
     @BindView(R.id.toolbar) Toolbar toolbar;
 
     private final OkHttpClient client = new OkHttpClient();
@@ -57,6 +62,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setupLayouts();
+
+        if (savedInstanceState != null) restoreData(savedInstanceState);
+
+        loadMovies(currentPage);
+    }
+
+    private void restoreData(Bundle inState) {
+        currentPage = inState.getInt(STATE_CURRENT_PAGE);
+
+        if (currentPage > 1)
+            for (int page = 1; page < currentPage; page++)
+                loadMovies(page);
     }
 
     private void setupLayouts() {
@@ -77,10 +94,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        loadMovies(currentPage);
+    @OnClick(R.id.fab_scroll_reset)
+    public void onFabScrollResetClick(View v) {
+        moviesRecyclerView.getLayoutManager().scrollToPosition(0);
     }
 
     private void loadMovies(int pageNumber) {
@@ -223,6 +239,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_sort:
+
+                return true;
+            case R.id.action_setting:
+                Intent settingIntent = new Intent(this, SettingsActivity.class);
+                startActivity(settingIntent);
+                return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 }

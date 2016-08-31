@@ -1,4 +1,4 @@
-package com.shane.popularmovies;
+package com.shane.popularmovies.models;
 
 import com.google.gson.annotations.SerializedName;
 

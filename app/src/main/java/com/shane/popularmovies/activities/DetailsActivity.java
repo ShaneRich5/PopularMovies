@@ -7,12 +7,11 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 
 import com.google.gson.Gson;
-import com.shane.popularmovies.Movie;
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.constants.Constants;
+import com.shane.popularmovies.models.Movie;
 
 import java.io.IOException;
 
@@ -46,13 +45,8 @@ public class DetailsActivity extends AppCompatActivity {
 //        loadMovieData();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show());
     }
 
     private void loadMovieData() {

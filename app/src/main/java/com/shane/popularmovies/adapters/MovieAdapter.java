@@ -10,7 +10,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.shane.popularmovies.Movie;
+import com.shane.popularmovies.models.Movie;
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.activities.DetailsActivity;
 import com.shane.popularmovies.constants.Constants;

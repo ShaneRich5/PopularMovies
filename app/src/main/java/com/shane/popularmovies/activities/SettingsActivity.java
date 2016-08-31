@@ -2,16 +2,21 @@ package com.shane.popularmovies.activities;
 
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
-import com.shane.popularmovies.AppCompatPreferenceActivity;
-import com.shane.popularmovies.R;
+import com.shane.popularmovies.fragments.SettingsFragment;
 
-public class SettingsActivity extends AppCompatPreferenceActivity {
+public class SettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.pref_general);
-    }
 
+        SettingsFragment fragment = SettingsFragment.newInstance();
+
+        getFragmentManager()
+                .beginTransaction()
+                .replace(android.R.id.content, fragment, fragment.getTag())
+                .commit();
+    }
 }
