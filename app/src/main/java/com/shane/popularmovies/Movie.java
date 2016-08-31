@@ -2,10 +2,12 @@ package com.shane.popularmovies;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Created by Shane on 8/30/2016.
  */
-public class Movie {
+public class Movie implements Serializable {
     private String id;
     private String title;
     @SerializedName("poster_path")

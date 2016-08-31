@@ -41,6 +41,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         notifyDataSetChanged();
     }
 
+    public List<Movie> getMovies() {
+        return movies;
+    }
+
     @Override
     public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View rootView = LayoutInflater.from(parent.getContext())
@@ -75,7 +79,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     @Override
     public int getItemCount() {
-        return 0;
+        return movies.size();
     }
 
     public class MovieViewHolder extends RecyclerView.ViewHolder {
