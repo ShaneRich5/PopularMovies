@@ -18,6 +18,7 @@ import com.shane.popularmovies.Movie;
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.adapters.MovieAdapter;
 import com.shane.popularmovies.constants.Constants;
+import com.shane.popularmovies.views.EndlessRecyclerOnScrollListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,6 +64,14 @@ public class MainActivity extends AppCompatActivity {
 
         movieAdapter = new MovieAdapter(this);
         moviesRecyclerView.setAdapter(movieAdapter);
+
+        moviesRecyclerView.addOnScrollListener(new EndlessRecyclerOnScrollListener(gridLayoutManager) {
+            @Override
+            public void onLoadMore(int currentPage) {
+                loadMovies(currentPage);
+                MainActivity.this.currentPage = currentPage;
+            }
+        });
     }
 
     @Override
@@ -76,10 +85,10 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "url = " + url);
 
         generateResultObservable(url)
-        .flatMap(this::convertResponseToMovieList)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(handleMoveListSubscription());
+                .flatMap(this::convertResponseToMovieList)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(handleMoveListSubscription());
     }
 
     private Subscriber<List<Movie>> handleMoveListSubscription() {
@@ -97,7 +106,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onNext(List<Movie> movies) {
                 movieAdapter.addMovies(movies);
-                currentPage++;
             }
         };
     }
