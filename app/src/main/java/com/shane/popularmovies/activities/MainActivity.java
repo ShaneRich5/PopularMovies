@@ -8,16 +8,25 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.shane.popularmovies.Movie;
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.constants.Constants;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -51,38 +60,59 @@ public class MainActivity extends AppCompatActivity {
                     Request request = new Request.Builder().url(url).build();
                     Response response = client.newCall(request).execute();
                     subscriber.onNext(response);
+                } catch (IOException e) {
+                    subscriber.onError(e);
+                }
+            }
+        }).flatMap(response -> Observable.create(new Observable.OnSubscribe<List<Movie>>() {
+            @Override
+            public void call(Subscriber<? super List<Movie>> subscriber) {
+                if(! response.isSuccessful())
+                    subscriber.onError(new AssertionError("Response failed"));
+
+                try {
+                    final String RESULTS_NODE = "results";
+                    final Gson gson = new Gson();
+
+                    final ResponseBody responseBody = response.body();
+                    final String serializedJsonResponse = responseBody.string();
+
+                    final JsonObject jsonPayload = new JsonParser().parse(serializedJsonResponse).getAsJsonObject();
+                    final JsonArray moviesAsJsonArray = jsonPayload.getAsJsonArray(RESULTS_NODE);
+
+                    final List<Movie> movies = new ArrayList<>();
+
+                    for (JsonElement movieElement : moviesAsJsonArray) {
+                        final Movie movie = gson.fromJson(movieElement, Movie.class);
+                        movies.add(movie);
+                    }
+
+                    subscriber.onNext(movies);
                     subscriber.onCompleted();
                 } catch (IOException e) {
                     subscriber.onError(e);
                 }
             }
-        })
+        }))
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<Response>() {
+        .subscribe(new Subscriber<List<Movie>>() {
+
             @Override
             public void onCompleted() {
-
+                Log.i(TAG, "moviesLoaded:completed");
             }
 
             @Override
             public void onError(Throwable e) {
-                Log.v(TAG, "movies:onError", e);
+                Log.e(TAG, "moviesLoaded:error", e);
             }
 
             @Override
-            public void onNext(Response response) {
-                if (!response.isSuccessful())
-                    Log.e(TAG, "response unsuccessful");
+            public void onNext(List<Movie> movies) {
 
-                try {
-                    String responseData = response.body().string();
-                    Log.i(TAG, "response = " + responseData);
-                } catch (IOException e) {
-                    Log.e(TAG, "movies:io", e);
-                }
             }
-        });
+        }).unsubscribe();
     }
 
     private String generateUrl() {
