@@ -8,6 +8,9 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -38,8 +41,8 @@ import rx.schedulers.Schedulers;
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getName();
 
-    public static final String CURRENT_PAGE_PARAM = "current_page";
-    public static final String MOVIE_ID_LIST_PARAM = "movie_id_list";
+    public static final String STATE_CURRENT_PAGE = "current_page";
+    public static final String STATE_MOVIE_ID_LIST = "movie_id_list";
 
     @BindView(R.id.recycler_movies) RecyclerView moviesRecyclerView;
     @BindView(R.id.toolbar) Toolbar toolbar;
@@ -188,8 +191,8 @@ public class MainActivity extends AppCompatActivity {
         List<Movie> moviesList = movieAdapter.getMovies();
         ArrayList<String> movieIds = transformMoviesToIds(moviesList);
 
-        outState.putInt(CURRENT_PAGE_PARAM, currentPage);
-        outState.putStringArrayList(MOVIE_ID_LIST_PARAM, movieIds);
+        outState.putInt(STATE_CURRENT_PAGE, currentPage);
+        outState.putStringArrayList(STATE_MOVIE_ID_LIST, movieIds);
     }
 
     private ArrayList<String> transformMoviesToIds(List<Movie> moviesList) {
@@ -200,5 +203,26 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return ids;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        currentPage = savedInstanceState.getInt(STATE_CURRENT_PAGE);
+
+        // TODO : use this to load old movies instead of reloading the entire list
+        List<String> ids = savedInstanceState.getStringArrayList(STATE_MOVIE_ID_LIST);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return super.onOptionsItemSelected(item);
     }
 }

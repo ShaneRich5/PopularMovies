@@ -20,4 +20,6 @@
     <string name="pref_sort_order_key">sort_order</string>
     <string name="pref_sort_order_label">Sort By</string>
     <string name="movie_poster_description">Movie poster</string>
+    <string name="sort">Sort</string>
+    <string name="settings">Settings</string>
 </resources>
