@@ -93,13 +93,13 @@ public class DetailsActivity extends AppCompatActivity {
 
             @Override
             public void onNext(Movie movie) {
-                Log.i(TAG, "movie:next");
+                Log.i(TAG, "movie:next " + movie.getTitle());
             }
         };
     }
 
     private Observable<Movie> convertResponseToMovieObservable(@NonNull Response response) {
-        return Observable.create((Observable.OnSubscribe<Movie>) subscriber -> {
+        return Observable.create(subscriber -> {
             try {
                 if (response.isSuccessful()) throw new IOException();
 
@@ -121,16 +121,13 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     private Observable<Response> generateResultObservableFromUrl(@NonNull String url) {
-        return Observable.create(new Observable.OnSubscribe<Response>() {
-            @Override
-            public void call(Subscriber<? super Response> subscriber) {
-                try {
-                    Request request = new Request.Builder().url(url).build();
-                    Response response = client.newCall(request).execute();
-                    subscriber.onNext(response);
-                } catch (IOException e) {
-                    subscriber.onError(e);
-                }
+        return Observable.create(subscriber -> {
+            try {
+                Request request = new Request.Builder().url(url).build();
+                Response response = client.newCall(request).execute();
+                subscriber.onNext(response);
+            } catch (IOException e) {
+                subscriber.onError(e);
             }
         });
     }
