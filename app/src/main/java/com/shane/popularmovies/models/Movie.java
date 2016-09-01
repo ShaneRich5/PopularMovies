@@ -9,6 +9,7 @@ import java.io.Serializable;
  */
 public class Movie implements Serializable {
     private String id;
+    @SerializedName("original_title")
     private String title;
     @SerializedName("poster_path")
     private String posterPath;

@@ -178,8 +178,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String generateUrl(int page) {
-        String sortOrder = loadSortOrderFromPreference();
-        String apiKey = getString(R.string.themoviedb_api_key);
+        final String sortOrder = loadSortOrderFromPreference();
+        final String apiKey = getString(R.string.themoviedb_api_key);
 
         return Constants.MOVIE_URL + "/" + sortOrder +
                 "?api_key=" + apiKey +

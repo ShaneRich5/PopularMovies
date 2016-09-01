@@ -11,4 +11,7 @@ public class Constants {
     public static final String POPULAR_TOP_RATED = "/popular";
 
     public static final String MOVIE_ID = "movie_id";
+
+    public static final String NODE_STATUS_MESSAGE = "status_message";
+    public static final String NODE_STATUS_CODE = "status_code";
 }

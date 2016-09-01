@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.constants.Constants;
+import com.shane.popularmovies.exceptions.ApiException;
 import com.shane.popularmovies.models.Movie;
 
 import java.io.IOException;
@@ -50,8 +51,15 @@ public class DetailsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         String id = getMovieIdFromIntent();
-        String url = Constants.MOVIE_URL + "/" + id;
+        String url = generateUrl(id);
         loadMovieDataFromApi(url);
+    }
+
+    private String generateUrl(String id) {
+        final String apiKey = getString(R.string.themoviedb_api_key);
+
+        return Constants.MOVIE_URL + "/" + id +
+                "?api_key=" + apiKey;
     }
 
     @OnClick(R.id.fab_favourite)
@@ -72,6 +80,8 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     private void loadMovieDataFromApi(@NonNull String url) {
+        Log.i(TAG, "url=" + url);
+
         generateResultObservableFromUrl(url)
             .flatMap(this::convertResponseToMovieObservable)
             .subscribeOn(Schedulers.io())
@@ -93,7 +103,7 @@ public class DetailsActivity extends AppCompatActivity {
 
             @Override
             public void onNext(Movie movie) {
-                Log.i(TAG, "movie:next " + movie.getTitle());
+                Log.i(TAG, "movie:next " + movie.getTitle() + "|" + movie.getPosterPath());
             }
         };
     }
@@ -101,22 +111,31 @@ public class DetailsActivity extends AppCompatActivity {
     private Observable<Movie> convertResponseToMovieObservable(@NonNull Response response) {
         return Observable.create(subscriber -> {
             try {
-                if (response.isSuccessful()) throw new IOException();
+                if (! response.isSuccessful()) throw new IOException();
 
                 final Movie movie = extractMovieFromResponse(response);
                 subscriber.onNext(movie);
                 subscriber.onCompleted();
-            } catch (IOException e) {
+            } catch (IOException | ApiException e) {
                 subscriber.onError(e);
             }
         });
     }
 
-    private Movie extractMovieFromResponse(@NonNull Response response) throws IOException {
-        String responseAsString = response.body().string();
-        Gson gson = new Gson();
+    private Movie extractMovieFromResponse(@NonNull Response response) throws IOException, ApiException {
+        final String responseAsString = response.body().string();
+        final Gson gson = new Gson();
 
         JsonObject jsonPayload = new JsonParser().parse(responseAsString).getAsJsonObject();
+
+        if (jsonPayload.has(Constants.NODE_STATUS_CODE) && jsonPayload.has(Constants.NODE_STATUS_MESSAGE)) {
+            int statusCode = jsonPayload.get(Constants.NODE_STATUS_CODE).getAsInt();
+            String statusMessage = jsonPayload.get(Constants.NODE_STATUS_MESSAGE).getAsString();
+
+            Log.i(TAG, "status=" + statusCode + ", message=" + statusMessage);
+            throw new ApiException(statusMessage);
+        }
+
         return gson.fromJson(jsonPayload, Movie.class);
     }
 
