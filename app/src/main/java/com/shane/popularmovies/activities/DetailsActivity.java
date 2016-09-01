@@ -8,8 +8,12 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.constants.Constants;
 import com.shane.popularmovies.models.Movie;
@@ -63,6 +67,7 @@ public class DetailsActivity extends AppCompatActivity {
         else
             message = "Sigh...";
 
+        lolCounter++;
         Snackbar.make(containerCoordinatorLayout, message, Snackbar.LENGTH_LONG).show();
     }
 
@@ -78,17 +83,17 @@ public class DetailsActivity extends AppCompatActivity {
         return new Subscriber<Movie>() {
             @Override
             public void onCompleted() {
-
+                Log.i(TAG, "movie:completed");
             }
 
             @Override
             public void onError(Throwable e) {
-
+                Log.e(TAG, "movie:error", e);
             }
 
             @Override
             public void onNext(Movie movie) {
-
+                Log.i(TAG, "movie:next");
             }
         };
     }
@@ -107,8 +112,12 @@ public class DetailsActivity extends AppCompatActivity {
         });
     }
 
-    private Movie extractMovieFromResponse(Response response) {
-        return null;
+    private Movie extractMovieFromResponse(@NonNull Response response) throws IOException {
+        String responseAsString = response.body().string();
+        Gson gson = new Gson();
+
+        JsonObject jsonPayload = new JsonParser().parse(responseAsString).getAsJsonObject();
+        return gson.fromJson(jsonPayload, Movie.class);
     }
 
     private Observable<Response> generateResultObservableFromUrl(@NonNull String url) {
