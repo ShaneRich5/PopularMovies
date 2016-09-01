@@ -10,7 +10,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
-import com.google.gson.Gson;
 import com.shane.popularmovies.R;
 import com.shane.popularmovies.constants.Constants;
 import com.shane.popularmovies.models.Movie;
@@ -26,7 +25,6 @@ import okhttp3.Response;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class DetailsActivity extends AppCompatActivity {
@@ -49,7 +47,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         String id = getMovieIdFromIntent();
         String url = Constants.MOVIE_URL + "/" + id;
-//        loadMovieDataFromApi(url);
+        loadMovieDataFromApi(url);
     }
 
     @OnClick(R.id.fab_favourite)
@@ -57,7 +55,7 @@ public class DetailsActivity extends AppCompatActivity {
         String message;
 
         if (lolCounter <= 1)
-            message = "Didnt finish yet :(";
+            message = "Didn't finish yet :(";
         else if (lolCounter == 2)
             message = "Just wait nuh :/";
         else if (lolCounter == 3)
@@ -70,10 +68,7 @@ public class DetailsActivity extends AppCompatActivity {
 
     private void loadMovieDataFromApi(@NonNull String url) {
         generateResultObservableFromUrl(url)
-            .flatMap((Func1<Response, Observable<Movie>>) response -> {
-                Gson gson = new Gson();
-                return null;
-            })
+            .flatMap(this::convertResponseToMovieObservable)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(handleMovieSubscription());
