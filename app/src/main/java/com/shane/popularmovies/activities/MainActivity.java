@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         final String url = generateUrl(pageNumber);
         Log.i(TAG, "url = " + url);
 
-        generateResultObservable(url)
+        generateResultObservableFromUrl(url)
                 .flatMap(this::convertResponseToMovieList)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -129,27 +130,22 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
-    private Observable<List<Movie>> convertResponseToMovieList(Response response) {
-        return Observable.create(new Observable.OnSubscribe<List<Movie>>() {
-            @Override
-            public void call(Subscriber<? super List<Movie>> subscriber) {
-                if (!response.isSuccessful())
-                    subscriber.onError(new AssertionError("Response failed"));
-                try {
-                    final List<Movie> movies = extractMoviesFromResponse(response);
-                    subscriber.onNext(movies);
-                    subscriber.onCompleted();
-                } catch (IOException e) {
-                    subscriber.onError(e);
-                }
+    private Observable<List<Movie>> convertResponseToMovieList(@NonNull Response response) {
+        return Observable.create(subscriber -> {
+            if (!response.isSuccessful())
+                subscriber.onError(new AssertionError("Response failed"));
+            try {
+                final List<Movie> movies = extractMoviesFromResponse(response);
+                subscriber.onNext(movies);
+                subscriber.onCompleted();
+            } catch (IOException e) {
+                subscriber.onError(e);
             }
         });
     }
 
-    private Observable<Response> generateResultObservable(String url) {
-        return Observable.create(new Observable.OnSubscribe<Response>() {
-            @Override
-            public void call(Subscriber<? super Response> subscriber) {
+    private Observable<Response> generateResultObservableFromUrl(@NonNull String url) {
+        return Observable.create(subscriber -> {
                 try {
                     Request request = new Request.Builder().url(url).build();
                     Response response = client.newCall(request).execute();
@@ -157,11 +153,10 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     subscriber.onError(e);
                 }
-            }
         });
     }
 
-    private List<Movie> extractMoviesFromResponse(Response response) throws IOException {
+    private List<Movie> extractMoviesFromResponse(@NonNull Response response) throws IOException {
         List<Movie> moviesList = new ArrayList<>();
 
         final String RESULTS_NODE = "results";

@@ -2,12 +2,12 @@ package com.shane.popularmovies.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 
 import com.google.gson.Gson;
@@ -47,9 +47,9 @@ public class DetailsActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
-        Log.i(TAG, "id=" + getMovieIdFromIntent());
-//        loadMovieData();
-
+        String id = getMovieIdFromIntent();
+        String url = Constants.MOVIE_URL + "/" + id;
+//        loadMovieDataFromApi(url);
     }
 
     @OnClick(R.id.fab_favourite)
@@ -68,30 +68,19 @@ public class DetailsActivity extends AppCompatActivity {
         Snackbar.make(containerCoordinatorLayout, message, Snackbar.LENGTH_LONG).show();
     }
 
-    private void loadMovieData() {
-        String idEndpoint = "/" + getMovieIdFromIntent();
+    private void loadMovieDataFromApi(@NonNull String url) {
+        generateResultObservableFromUrl(url)
+            .flatMap((Func1<Response, Observable<Movie>>) response -> {
+                Gson gson = new Gson();
+                return null;
+            })
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(handleMovieSubscription());
+    }
 
-        Observable.create(new Observable.OnSubscribe<Response>() {
-            @Override
-            public void call(Subscriber<? super Response> subscriber) {
-                try {
-                    Request request = new Request.Builder().url(Constants.MOVIE_URL + idEndpoint).build();
-                    Response response = client.newCall(request).execute();
-                    subscriber.onNext(response);
-                } catch (IOException e) {
-                    subscriber.onError(e);
-                }
-            }
-        })
-        .flatMap((Func1<Response, Observable<Movie>>) response -> {
-            Gson gson = new Gson();
-
-
-            return null;
-        })
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<Movie>() {
+    private Subscriber<Movie> handleMovieSubscription() {
+        return new Subscriber<Movie>() {
             @Override
             public void onCompleted() {
 
@@ -105,6 +94,39 @@ public class DetailsActivity extends AppCompatActivity {
             @Override
             public void onNext(Movie movie) {
 
+            }
+        };
+    }
+
+    private Observable<Movie> convertResponseToMovieObservable(@NonNull Response response) {
+        return Observable.create((Observable.OnSubscribe<Movie>) subscriber -> {
+            try {
+                if (response.isSuccessful()) throw new IOException();
+
+                final Movie movie = extractMovieFromResponse(response);
+                subscriber.onNext(movie);
+                subscriber.onCompleted();
+            } catch (IOException e) {
+                subscriber.onError(e);
+            }
+        });
+    }
+
+    private Movie extractMovieFromResponse(Response response) {
+        return null;
+    }
+
+    private Observable<Response> generateResultObservableFromUrl(@NonNull String url) {
+        return Observable.create(new Observable.OnSubscribe<Response>() {
+            @Override
+            public void call(Subscriber<? super Response> subscriber) {
+                try {
+                    Request request = new Request.Builder().url(url).build();
+                    Response response = client.newCall(request).execute();
+                    subscriber.onNext(response);
+                } catch (IOException e) {
+                    subscriber.onError(e);
+                }
             }
         });
     }
