@@ -46,6 +46,10 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.fab_favourite) FloatingActionButton favouriteFab;
     @BindView(R.id.image_poster) ImageView posterImageView;
     @BindView(R.id.text_overview) TextView overviewTextView;
+    @BindView(R.id.text_release_status) TextView releaseStatusTextView;
+    @BindView(R.id.text_release_date) TextView releaseDateTextView;
+    @BindView(R.id.text_rating) TextView ratingTextView;
+    @BindView(R.id.text_vote_count) TextView voteCountTextView;
     @BindView(R.id.toolbar) Toolbar toolbar;
 
     private OkHttpClient client = new OkHttpClient();
