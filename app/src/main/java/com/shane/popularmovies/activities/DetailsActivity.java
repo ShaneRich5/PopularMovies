@@ -3,14 +3,20 @@ package com.shane.popularmovies.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -36,8 +42,11 @@ public class DetailsActivity extends AppCompatActivity {
     public static final String TAG = DetailsActivity.class.getName();
 
     @BindView(R.id.coordinator_container) CoordinatorLayout containerCoordinatorLayout;
-    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout collapsingToolbarLayout;
     @BindView(R.id.fab_favourite) FloatingActionButton favouriteFab;
+    @BindView(R.id.image_poster) ImageView posterImageView;
+    @BindView(R.id.text_overview) TextView overviewTextView;
+    @BindView(R.id.toolbar) Toolbar toolbar;
 
     private OkHttpClient client = new OkHttpClient();
 
@@ -49,6 +58,7 @@ public class DetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_details);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         String id = getMovieIdFromIntent();
         String url = generateUrl(id);
@@ -80,8 +90,6 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     private void loadMovieDataFromApi(@NonNull String url) {
-        Log.i(TAG, "url=" + url);
-
         generateResultObservableFromUrl(url)
             .flatMap(this::convertResponseToMovieObservable)
             .subscribeOn(Schedulers.io())
@@ -103,9 +111,26 @@ public class DetailsActivity extends AppCompatActivity {
 
             @Override
             public void onNext(Movie movie) {
-                Log.i(TAG, "movie:next " + movie.getTitle() + "|" + movie.getPosterPath());
+                Log.i(TAG, "movie:next");
+                addMovieDataToViews(movie);
             }
         };
+    }
+
+    private void addMovieDataToViews(@NonNull Movie movie) {
+        String posterUrl = Constants.IMAGE_URL + movie.getPosterPath();
+        loadMoviePosterFromUrl(posterUrl);
+
+        collapsingToolbarLayout.setTitle(movie.getTitle());
+        overviewTextView.setText(movie.getOverview());
+    }
+
+    private void loadMoviePosterFromUrl(String posterUrl) {
+        Glide.with(this).load(posterUrl)
+                .thumbnail(0.5f).crossFade()
+                .error(R.drawable.ic_error_outline_black_48dp)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(posterImageView);
     }
 
     private Observable<Movie> convertResponseToMovieObservable(@NonNull Response response) {
@@ -158,5 +183,15 @@ public class DetailsActivity extends AppCompatActivity {
             return movieIntent.getStringExtra(Constants.MOVIE_ID);
 
         throw new AssertionError("Unable to find id");
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
