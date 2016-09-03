@@ -44,12 +44,8 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.coordinator_container) CoordinatorLayout containerCoordinatorLayout;
     @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout collapsingToolbarLayout;
     @BindView(R.id.fab_favourite) FloatingActionButton favouriteFab;
-    @BindView(R.id.image_poster) ImageView posterImageView;
     @BindView(R.id.text_overview) TextView overviewTextView;
-    @BindView(R.id.text_release_status) TextView releaseStatusTextView;
-    @BindView(R.id.text_release_date) TextView releaseDateTextView;
-    @BindView(R.id.text_rating) TextView ratingTextView;
-    @BindView(R.id.text_vote_count) TextView voteCountTextView;
+    @BindView(R.id.image_poster) ImageView posterImageView;
     @BindView(R.id.toolbar) Toolbar toolbar;
 
     private OkHttpClient client = new OkHttpClient();
@@ -157,15 +153,18 @@ public class DetailsActivity extends AppCompatActivity {
 
         JsonObject jsonPayload = new JsonParser().parse(responseAsString).getAsJsonObject();
 
-        if (jsonPayload.has(Constants.NODE_STATUS_CODE) && jsonPayload.has(Constants.NODE_STATUS_MESSAGE)) {
-            int statusCode = jsonPayload.get(Constants.NODE_STATUS_CODE).getAsInt();
-            String statusMessage = jsonPayload.get(Constants.NODE_STATUS_MESSAGE).getAsString();
-
-            Log.i(TAG, "status=" + statusCode + ", message=" + statusMessage);
-            throw new ApiException(statusMessage);
-        }
+        if (jsonPayload.has(Constants.NODE_STATUS_CODE) && jsonPayload.has(Constants.NODE_STATUS_MESSAGE))
+            extractErrorsFromJsonPayload(jsonPayload);
 
         return gson.fromJson(jsonPayload, Movie.class);
+    }
+
+    private void extractErrorsFromJsonPayload(JsonObject jsonPayload) throws ApiException {
+        int statusCode = jsonPayload.get(Constants.NODE_STATUS_CODE).getAsInt();
+        String statusMessage = jsonPayload.get(Constants.NODE_STATUS_MESSAGE).getAsString();
+
+        Log.i(TAG, "status=" + statusCode + ", message=" + statusMessage);
+        throw new ApiException(statusMessage);
     }
 
     private Observable<Response> generateResultObservableFromUrl(@NonNull String url) {

@@ -16,10 +16,13 @@ public class Movie implements Serializable {
     @SerializedName("release_date")
     private String releaseDate;
     @SerializedName("video_count")
-    private int voteCount;
+    private int votes;
+    @SerializedName("overview")
     private String overview;
     @SerializedName("vote_average")
-    private int voteAverage;
+    private int rating;
+    @SerializedName("status")
+    private String releaseStatus;
 
     public String getId() {
         return id;
@@ -53,12 +56,20 @@ public class Movie implements Serializable {
         this.releaseDate = releaseDate;
     }
 
-    public int getVoteCount() {
-        return voteCount;
+    public int getVotes() {
+        return votes;
     }
 
-    public void setVoteCount(int voteCount) {
-        this.voteCount = voteCount;
+    public String getReleaseStatus() {
+        return releaseStatus;
+    }
+
+    public void setReleaseStatus(String releaseStatus) {
+        this.releaseStatus = releaseStatus;
+    }
+
+    public void setVotes(int votes) {
+        this.votes = votes;
     }
 
     public String getOverview() {
@@ -69,11 +80,11 @@ public class Movie implements Serializable {
         this.overview = overview;
     }
 
-    public int getVoteAverage() {
-        return voteAverage;
+    public int getRating() {
+        return rating;
     }
 
-    public void setVoteAverage(int voteAverage) {
-        this.voteAverage = voteAverage;
+    public void setRating(int rating) {
+        this.rating = rating;
     }
 }
