@@ -45,7 +45,6 @@ import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getName();
-
     public static final String STATE_CURRENT_PAGE = "current_page";
     public static final String STATE_MOVIE_ID_LIST = "movie_id_list";
 
@@ -55,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
 
     private final OkHttpClient client = new OkHttpClient();
     private MovieAdapter movieAdapter;
+    private SharedPreferences.OnSharedPreferenceChangeListener listener;
+    private SharedPreferences preferences;
     private int currentPage = 1;
 
     @Override
@@ -67,6 +68,19 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState != null) restoreData(savedInstanceState);
 
         loadMovies(currentPage);
+        attachPreferenceListener();
+    }
+
+    private void attachPreferenceListener() {
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        listener = (sharedPreferences, key) -> {
+            if (key.equals(getString(R.string.pref_sort_order_key))) {
+                movieAdapter.clearMovies();
+                currentPage = 1;
+                loadMovies(currentPage);
+            }
+        };
+        preferences.registerOnSharedPreferenceChangeListener(listener);
     }
 
     private void restoreData(Bundle inState) {
@@ -194,7 +208,6 @@ public class MainActivity extends AppCompatActivity {
                 defaultSortOrder);
     }
 
-
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -235,14 +248,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_sort:
-
-                return true;
             case R.id.action_setting:
                 Intent settingIntent = new Intent(this, SettingsActivity.class);
                 startActivity(settingIntent);
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (listener != null)
+            preferences.unregisterOnSharedPreferenceChangeListener(listener);
     }
 }

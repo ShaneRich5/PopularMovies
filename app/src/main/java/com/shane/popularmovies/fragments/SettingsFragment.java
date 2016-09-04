@@ -48,6 +48,6 @@ public class SettingsFragment extends PreferenceFragment
                 preference.setSummary(listPreference.getEntries()[preferenceIndex]);
         } else
             preference.setSummary(stringValue);
-        return false;
+        return true;
     }
 }

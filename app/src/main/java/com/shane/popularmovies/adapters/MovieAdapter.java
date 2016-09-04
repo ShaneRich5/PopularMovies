@@ -82,6 +82,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         return movies.size();
     }
 
+    public void clearMovies() {
+        int size = movies.size();
+        if (size > 0)
+            for (int i = 0; i < size; i++)
+                movies.remove(0);
+        notifyDataSetChanged();
+    }
+
     public class MovieViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.square_container) SquareRelativeLayout squareLayoutContainer;
         @BindView(R.id.image_poster) ImageView posterImageView;
