@@ -26,6 +26,10 @@ import com.shane.popularmovies.exceptions.ApiException;
 import com.shane.popularmovies.models.Movie;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,6 +49,8 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout collapsingToolbarLayout;
     @BindView(R.id.fab_favourite) FloatingActionButton favouriteFab;
     @BindView(R.id.text_overview) TextView overviewTextView;
+    @BindView(R.id.text_rating) TextView ratingTextView;
+    @BindView(R.id.text_release_date) TextView releaseDateTextView;
     @BindView(R.id.image_poster) ImageView posterImageView;
     @BindView(R.id.toolbar) Toolbar toolbar;
 
@@ -121,8 +127,27 @@ public class DetailsActivity extends AppCompatActivity {
         String posterUrl = Constants.IMAGE_URL + movie.getPosterPath();
         loadMoviePosterFromUrl(posterUrl);
 
+        String releaseDate;
+
+        try {
+            releaseDate = transformDate(movie.getReleaseDate());
+        } catch (ParseException e) {
+            Log.e(TAG, "dateParse:failed", e);
+            releaseDate = "Error";
+        }
+        String rating = movie.getRating() + "/10";
+
         collapsingToolbarLayout.setTitle(movie.getTitle());
         overviewTextView.setText(movie.getOverview());
+        ratingTextView.setText(rating);
+        releaseDateTextView.setText(releaseDate);
+    }
+
+    private String transformDate(String releaseDate) throws ParseException {
+        SimpleDateFormat oldDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        SimpleDateFormat newDateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.US);
+        Date oldDate = oldDateFormat.parse(releaseDate);
+        return newDateFormat.format(oldDate);
     }
 
     private void loadMoviePosterFromUrl(String posterUrl) {
