@@ -6,12 +6,10 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -33,7 +31,6 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -47,7 +44,6 @@ public class DetailsActivity extends AppCompatActivity {
 
     @BindView(R.id.coordinator_container) CoordinatorLayout containerCoordinatorLayout;
     @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout collapsingToolbarLayout;
-    @BindView(R.id.fab_favourite) FloatingActionButton favouriteFab;
     @BindView(R.id.text_overview) TextView overviewTextView;
     @BindView(R.id.text_rating) TextView ratingTextView;
     @BindView(R.id.text_release_date) TextView releaseDateTextView;
@@ -55,8 +51,6 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.toolbar) Toolbar toolbar;
 
     private OkHttpClient client = new OkHttpClient();
-
-    private int lolCounter = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,23 +70,6 @@ public class DetailsActivity extends AppCompatActivity {
 
         return Constants.MOVIE_URL + "/" + id +
                 "?api_key=" + apiKey;
-    }
-
-    @OnClick(R.id.fab_favourite)
-    public void onFavouriteFabClicked(View v){
-        String message;
-
-        if (lolCounter <= 1)
-            message = "Didn't finish yet :(";
-        else if (lolCounter == 2)
-            message = "Just wait nuh :/";
-        else if (lolCounter == 3)
-            message = "The sumn nah work -.-";
-        else
-            message = "Sigh...";
-
-        lolCounter++;
-        Snackbar.make(containerCoordinatorLayout, message, Snackbar.LENGTH_LONG).show();
     }
 
     private void loadMovieDataFromApi(@NonNull String url) {
