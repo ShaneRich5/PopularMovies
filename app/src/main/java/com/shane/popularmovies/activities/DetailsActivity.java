@@ -107,17 +107,14 @@ public class DetailsActivity extends AppCompatActivity {
         return new Subscriber<Movie>() {
             @Override
             public void onCompleted() {
-                Log.i(TAG, "movie:completed");
             }
 
             @Override
             public void onError(Throwable e) {
-                Log.e(TAG, "movie:error", e);
             }
 
             @Override
             public void onNext(Movie movie) {
-                Log.i(TAG, "movie:next");
                 addMovieDataToViews(movie);
             }
         };
@@ -132,7 +129,6 @@ public class DetailsActivity extends AppCompatActivity {
         try {
             releaseDate = transformDate(movie.getReleaseDate());
         } catch (ParseException e) {
-            Log.e(TAG, "dateParse:failed", e);
             releaseDate = "Error";
         }
         String rating = movie.getRating() + "/10";
